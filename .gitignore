@@ -1,4 +1,5 @@
 .babelrc
 .eslintrc.json
+log/**/*
 node_modules
 test/results/**/*

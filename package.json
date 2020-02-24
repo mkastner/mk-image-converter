@@ -1,6 +1,6 @@
 {
   "name": "mk-image-converter",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ImageMagic converter",
   "main": "index.js",
   "author": "John Galt",
@@ -12,8 +12,10 @@
     }
   },
   "dependencies": {
+    "image-size": "^0.8.3",
     "mime-types": "^2.1.26",
     "mkdirp": "^1.0.3",
+    "mk-graceful-stat": "https://github.com/mkastner/mk-graceful-stat.git#v0.0.1",
     "rimraf": "^3.0.2"
   },
   "peerDependencies": {
@@ -22,6 +24,7 @@
   "devDependencies": {
     "babel-eslint": "^10.0.3",
     "eslint": "^6.8.0",
+    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.9",
     "nodemon": "^2.0.2",
     "tape": "^4.13.0"
   },

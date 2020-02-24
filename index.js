@@ -3,7 +3,7 @@ const log = require('mk-log');
 const path = require('path');
 const mkdirp = require('mkdirp');
 //const { spawn } = require('child_process');
-const gracefulStat = require('./lib/utils/graceful-stat');
+const gracefulStat = require('mk-graceful-stat');
 const convert = require('./lib/utils/convert');
 const deconstructBase64 = require('./lib/utils/deconstruct-base64');
 
@@ -41,7 +41,7 @@ module.exports = async function MkAssets(assetsBaseDir, optionArgs) {
   let assetsDir;
 
   const options = {
-    id: null
+    subPath: null
   };
 
   if (optionArgs) {
@@ -50,8 +50,8 @@ module.exports = async function MkAssets(assetsBaseDir, optionArgs) {
     }
   }
 
-  if (options.id) {
-    assetsDir = path.join(assetsBaseDir, options.id); 
+  if (options.subPath) {
+    assetsDir = path.join(assetsBaseDir, options.subPath); 
   } else {
     assetsDir = assetsBaseDir;
   }
@@ -61,6 +61,7 @@ module.exports = async function MkAssets(assetsBaseDir, optionArgs) {
   await ensureDir(originalDir);
 
   return {
+
     async saveOriginalBase64(baseFileName, base64URI) {
       
       try { 
@@ -70,12 +71,14 @@ module.exports = async function MkAssets(assetsBaseDir, optionArgs) {
         const filePath = path.join(originalDir, fileName);
         await fs.writeFile(filePath, data, 'base64');
       } catch (err) {
+    
         log.error(err);
       }
     },
     async saveOriginalBinary(fileName, binaryData) {
 
       try {
+        
         const filePath = path.join(originalDir, fileName);
         await fs.writeFile(filePath, binaryData, 'binary');
       } catch (err) {
@@ -84,6 +87,7 @@ module.exports = async function MkAssets(assetsBaseDir, optionArgs) {
       }
     },
     async convert(originalFile, items) {
+      
       const originalFilePath = path.join(originalDir, originalFile);
       const originalSplitted = originalFile.split(/\./);
       const originalBaseFileName = originalSplitted[0];
@@ -91,6 +95,7 @@ module.exports = async function MkAssets(assetsBaseDir, optionArgs) {
 
       const imageMagickArgs = [originalFilePath];
       for (let i = 0, l = items.length; i < l; i++) {
+      
         const item = items[i];
         const size = item.size;
         const type = item.type;
