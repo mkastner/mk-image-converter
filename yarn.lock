@@ -1387,9 +1387,15 @@ minimist@^1.2.0, minimist@~1.2.0:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
   integrity sha1-o1AIsg9BOD7sH7kU9M1d95omQoQ=
 
-"mk-graceful-stat@https://github.com/mkastner/mk-graceful-stat.git#v0.0.1":
+"mk-deconstruct-base64@https://github.com/mkastner/mk-deconstruct-base64.git#v0.0.1":
   version "0.0.1"
-  resolved "https://github.com/mkastner/mk-graceful-stat.git#4e10ac4875f28c844d6d96421270d75ff0d2761a"
+  resolved "https://github.com/mkastner/mk-deconstruct-base64.git#eecd4a136951137efea07a2cc662d738e5897fd0"
+  dependencies:
+    mime-types "^2.1.26"
+
+"mk-graceful-stat@https://github.com/mkastner/mk-graceful-stat.git#v0.0.2":
+  version "0.0.2"
+  resolved "https://github.com/mkastner/mk-graceful-stat.git#015561351e181f2f6b80a45e01f750ee0dcf3543"
 
 "mk-log@https://github.com/mkastner/mk-log.git#v0.0.9":
   version "0.0.9"

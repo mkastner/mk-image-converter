@@ -1,5 +1,5 @@
 const tape = require('tape');
-const deconstructBase64 = require('../lib/utils/deconstruct-base64');
+const deconstructBase64 = require('mk-deconstruct-base64');
 const gracefulStat = require('mk-graceful-stat');
 const fs = require('fs').promises;
 const path = require('path');
@@ -76,7 +76,10 @@ async function main() {
         path.join(__dirname, 'assets','example-png.base64'), 'utf8' );
       
       const assets = await ImageConverter(path.join(__dirname, 'results'));
-      await assets.saveOriginalBase64('base64-example', base64PNGData);  
+      const PNGResult = await assets.saveOriginalBase64('base64-example', base64PNGData);  
+    
+      t.ok(PNGResult.stat, 'returning stat object');
+      t.equal(PNGResult.mimeType, 'image/png', 'returning stat object');
 
       const statResultPNG = await gracefulStat(
         path.join(__dirname, 'results', 'original', 'base64-example.png'), true);
@@ -85,7 +88,10 @@ async function main() {
       
       const base64JPGData = await fs.readFile(
         path.join(__dirname, 'assets','example-jpg.base64'), 'utf8' );
-      await assets.saveOriginalBase64('base64-example', base64JPGData);  
+      const JPGResult = await assets.saveOriginalBase64('base64-example', base64JPGData);  
+
+      t.ok(JPGResult.stat, 'returning stat object');
+      t.equal(JPGResult.mimeType, 'image/jpeg', 'returning stat object');
 
       const statResultJPG = await gracefulStat(
         path.join(__dirname, 'results', 'original', 'base64-example.jpg'), true);
@@ -109,7 +115,10 @@ async function main() {
         path.join(__dirname, 'assets','example.jpg') );
       
       const assets = await ImageConverter(path.join(__dirname, 'results'));
-      await assets.saveOriginalBinary('example.jpg', exampleFile);  
+      const JPGResult = await assets.saveOriginalBinary('example.jpg', exampleFile);  
+      t.ok(JPGResult.stat, 'returning stat object');
+      t.equal(JPGResult.mimeType, 'image/jpeg', 'returning stat object');
+      
       const statResult = await gracefulStat(
         path.join(__dirname, 'results', 'original', 'example.jpg'), true);
       
@@ -118,7 +127,9 @@ async function main() {
       const subPath = '74';
       
       const assetsWithId = await ImageConverter(path.join(__dirname, 'results'), {subPath});
-      await assetsWithId.saveOriginalBinary('example.jpg', exampleFile);  
+      const result = await assetsWithId.saveOriginalBinary('example.jpg', exampleFile);  
+      t.ok(result.stat, 'returning stat object');
+      
       const statResultWithId = await gracefulStat(
         path.join(__dirname, 'results', subPath, 'original', 'example.jpg'), true);
       
@@ -133,7 +144,7 @@ async function main() {
     }
   });
   
-  tape('convert from original to different sizes', async (t) => {
+  tape('convert from original to different sizes and file types', async (t) => {
   
     try {
       
@@ -150,7 +161,6 @@ async function main() {
 
       await assets.convert('example.jpg', convertArgs);
 
-
       const statResultMedium = await gracefulStat(
         path.join(__dirname, 'results', 'medium', 'example.png'), true);
 
@@ -166,7 +176,9 @@ async function main() {
       const assetsWithId = await ImageConverter(path.join(__dirname, 'results'), {subPath});
       await assetsWithId.saveOriginalBinary('example.jpg', exampleFile);  
 
-      await assetsWithId.convert('example.jpg', convertArgs);
+      const convertedFiles = await assetsWithId.convert('example.jpg', convertArgs);
+
+      t.equal(convertArgs.length, convertedFiles.length, 'all types converted');
 
       const statResultMediumWithId = await gracefulStat(
         path.join(__dirname, 'results', subPath, 'medium', 'example.png'), true);
@@ -177,7 +189,9 @@ async function main() {
         path.join(__dirname, 'results', subPath, 'thumbnail', 'example.jpg'), true);
 
       t.ok(statResultThumbnailWithId, 'Thumbnail version with subPath converted');
-    
+   
+       
+
     } catch (err) {
       log.error(err); 
 
