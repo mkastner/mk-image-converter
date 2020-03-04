@@ -76,25 +76,25 @@ async function main() {
         path.join(__dirname, 'assets','example-png.base64'), 'utf8' );
       
       const assets = await ImageConverter(path.join(__dirname, 'results'));
-      const PNGResult = await assets.saveOriginalBase64('base64-example', base64PNGData);  
+      const PNGResult = await assets.saveTempBase64('base64-example', base64PNGData);  
     
       t.ok(PNGResult.stat, 'returning stat object');
       t.equal(PNGResult.mimeType, 'image/png', 'returning stat object');
 
       const statResultPNG = await gracefulStat(
-        path.join(__dirname, 'results', 'original', 'base64-example.png'), true);
+        path.join(__dirname, 'results', 'tmp', 'base64-example.png'), true);
 
       t.ok(statResultPNG, 'original base64 as png file saved');
       
       const base64JPGData = await fs.readFile(
         path.join(__dirname, 'assets','example-jpg.base64'), 'utf8' );
-      const JPGResult = await assets.saveOriginalBase64('base64-example', base64JPGData);  
+      const JPGResult = await assets.saveTempBase64('base64-example', base64JPGData);  
 
       t.ok(JPGResult.stat, 'returning stat object');
       t.equal(JPGResult.mimeType, 'image/jpeg', 'returning stat object');
 
       const statResultJPG = await gracefulStat(
-        path.join(__dirname, 'results', 'original', 'base64-example.jpg'), true);
+        path.join(__dirname, 'results', 'tmp', 'base64-example.jpg'), true);
       
       t.ok(statResultJPG, 'original base64 as jpg saved');
 
@@ -115,29 +115,27 @@ async function main() {
         path.join(__dirname, 'assets','example.jpg') );
       
       const assets = await ImageConverter(path.join(__dirname, 'results'));
-      const JPGResult = await assets.saveOriginalBinary('example.jpg', exampleFile);  
+      const JPGResult = await assets.saveTempBinary('example.jpg', exampleFile);  
       t.ok(JPGResult.stat, 'returning stat object');
       t.equal(JPGResult.mimeType, 'image/jpeg', 'returning stat object');
       
       const statResult = await gracefulStat(
-        path.join(__dirname, 'results', 'original', 'example.jpg'), true);
+        path.join(__dirname, 'results', 'tmp', 'example.jpg'), true);
       
       t.ok(statResult, 'original file saved');
       
-      const subPath = '74';
-      
-      const assetsWithId = await ImageConverter(path.join(__dirname, 'results'), {subPath});
-      const result = await assetsWithId.saveOriginalBinary('example.jpg', exampleFile);  
+      const assetsWithId = await ImageConverter(path.join(__dirname, 'results'));
+      const result = await assetsWithId.saveTempBinary('example.jpg', exampleFile);  
       t.ok(result.stat, 'returning stat object');
       
       const statResultWithId = await gracefulStat(
-        path.join(__dirname, 'results', subPath, 'original', 'example.jpg'), true);
+        path.join(__dirname, 'results', 'tmp', 'example.jpg'), true);
       
       t.ok(statResultWithId, 'original file saved with subPath');
 
     } catch (err) {
+    
       log.error(err); 
-
     } finally {
 
       t.end();
@@ -152,7 +150,7 @@ async function main() {
         path.join(__dirname, 'assets','example.jpg') );
       
       const assets = await ImageConverter(path.join(__dirname, 'results'));
-      await assets.saveOriginalBinary('example.jpg', exampleFile);  
+      await assets.saveTempBinary('example.jpg', exampleFile);  
      
       const convertArgs = [
         { type: 'medium', size: '100x>', ext: 'png' },
@@ -173,15 +171,15 @@ async function main() {
     
       const subPath = '74';
 
-      const assetsWithId = await ImageConverter(path.join(__dirname, 'results'), {subPath});
-      await assetsWithId.saveOriginalBinary('example.jpg', exampleFile);  
+      const assetsWithId = await ImageConverter(path.join(__dirname, 'results'));
+      await assetsWithId.saveTempBinary('example.jpg', exampleFile);  
 
-      const convertedFiles = await assetsWithId.convert('example.jpg', convertArgs);
+      const convertedFiles = await assetsWithId.convert('example.jpg', convertArgs, {subPath});
 
       t.equal(convertArgs.length, convertedFiles.length, 'all types converted');
 
       const statResultMediumWithId = await gracefulStat(
-        path.join(__dirname, 'results', subPath, 'medium', 'example.png'), true);
+        path.join(__dirname, 'results', 'medium', 'example.png'), true);
 
       t.ok(statResultMediumWithId, 'Medium version with subPath converted');
       

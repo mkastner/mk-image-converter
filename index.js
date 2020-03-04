@@ -40,31 +40,22 @@ async function ensureDir(dir) {
 
 module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
 
-  let assetsDir;
+  const options = Object.assign({
+    tempPath: 'tmp' 
+  }, optionArgs);
 
-  const options = {
-    subPath: null
-  };
 
-  if (optionArgs) {
-    for (let key in optionArgs) {
-      options[key] = optionArgs[key];
-    }
-  }
+  if (!options.tempPath) {
+    throw new Error('tempDir must be a sub path of assetsDir');
+  }  
 
-  if (options.subPath) {
-    assetsDir = path.join(assetsBaseDir, options.subPath); 
-  } else {
-    assetsDir = assetsBaseDir;
-  }
-
-  await ensureDir(assetsDir);
-  const originalDir = path.join(assetsDir, 'original'); 
-  await ensureDir(originalDir);
+  const tempDir = path.join(assetsBaseDir, options.tempPath);
+  await ensureDir(assetsBaseDir);
+  await ensureDir(tempDir);
 
   return {
 
-    async saveOriginalBase64(fileName, base64URI) {
+    async saveTempBase64(fileName, base64URI) {
       
       try { 
         
@@ -75,10 +66,10 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
         if (fileName.indexOf('.') === -1) { 
           finalFileName = `${fileName}.${extension}`;
         }
-        const filePath = path.join(originalDir, finalFileName);
-        await fs.writeFile(filePath, data, 'base64');
+        const tempFilePath = path.join(tempDir, finalFileName);
+        await fs.writeFile(tempFilePath, data, 'base64');
         
-        const stat = await gracefulStat(filePath);
+        const stat = await gracefulStat(tempFilePath);
 
         return Promise.resolve({
           stat,
@@ -91,11 +82,11 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
         return Promise.reject(err);
       }
     },
-    async saveOriginalBinary(fileName, binaryData) {
+    async saveTempBinary(fileName, binaryData) {
 
       try {
         
-        const filePath = path.join(originalDir, fileName);
+        const filePath = path.join(tempDir, fileName);
         await fs.writeFile(filePath, binaryData, 'binary');
 
         const mimeType = mime.lookup(fileName); 
@@ -111,9 +102,24 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
         return Promise.reject(err);
       }
     },
-    async convert(originalFileName, items) {
+    async convert(originalFileName, items, options) {
+
+      let assetsDir = null;
+
+      if (options && options.subPath) {
+        assetsDir = path.join(assetsBaseDir, options.subPath); 
+      } else {
+        assetsDir = assetsBaseDir;
+      }
       
+      const originalDir = path.join(assetsDir, 'original'); 
+      await ensureDir(originalDir);
+
+      const tempFilePath = path.join(tempDir, originalFileName); 
       const originalFilePath = path.join(originalDir, originalFileName);
+      
+      await fs.rename(tempFilePath, originalFilePath);
+
       const originalSplitted = originalFileName.split(/\./);
       const originalBaseFileName = originalSplitted[0];
       const originalExtension = originalSplitted[1];
