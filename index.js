@@ -102,6 +102,7 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
         return Promise.reject(err);
       }
     },
+
     async convert(originalFileName, items, options) {
 
       let assetsDir = null;
@@ -160,8 +161,24 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
         convertedFiles[i].w = dimensions.width;
         convertedFiles[i].h = dimensions.height;
       }
-      
-      return convertedFiles;
+
+      const originalDimensions = imageSize(originalFilePath); 
+
+      const allFiles = convertedFiles.concat({
+        w: originalDimensions.width,
+        h: originalDimensions.height,
+        path: originalFilePath,
+        type: 'original'
+      });
+
+
+      allFiles.sort((a, b) => {
+        return a.w - b.w;
+      });
+
+      log.debug(allFiles);
+
+      return allFiles;
 
     }
   };

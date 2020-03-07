@@ -174,9 +174,15 @@ async function main() {
       const assetsWithId = await ImageConverter(path.join(__dirname, 'results'));
       await assetsWithId.saveTempBinary('example.jpg', exampleFile);  
 
-      const convertedFiles = await assetsWithId.convert('example.jpg', convertArgs, {subPath});
+      const availableFiles = await assetsWithId.convert('example.jpg', convertArgs, {subPath});
 
-      t.equal(convertArgs.length, convertedFiles.length, 'all types converted');
+      // available files must be convertedArgs.length
+      // i.e. the number of conversion types
+      // plus the original file
+
+      const convertedPlusOriginal = convertArgs.length + 1;
+
+      t.equal(convertedPlusOriginal, availableFiles.length, 'all types converted');
 
       const statResultMediumWithId = await gracefulStat(
         path.join(__dirname, 'results', 'medium', 'example.png'), true);
