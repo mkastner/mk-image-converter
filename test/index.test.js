@@ -203,6 +203,28 @@ async function main() {
       t.end();
     }
   });
+  
+  tape('check utility method tempfileExists', async (t) => {
+    
+    try { 
+  
+      const base64PNGData = await fs.readFile(
+        path.join(__dirname, 'assets','example-png.base64'), 'utf8' );
+      const assets = await ImageConverter(path.join(__dirname, 'results'));
+      const resultBeforeTemp = await assets.tempFileExists('example.png'); 
+      t.notOk(resultBeforeTemp, 'temp file not detected'); 
+      //const saveResult = 
+      await assets.saveTempBase64('base64-example', base64PNGData); 
+      const resultAfterTemp = await assets.tempFileExists('base64-example.png'); 
+      t.ok(resultAfterTemp, 'temp file was detected'); 
+    } catch (err) {
+    
+      log.error(err); 
+    } finally {
+     
+      t.end();
+    }
+  });
 }
 
 main();

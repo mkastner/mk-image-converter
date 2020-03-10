@@ -40,7 +40,7 @@ async function ensureDir(dir) {
 
 module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
 
-  const options = Object.assign({
+  const options = Object.assign({}, {
     tempPath: 'tmp' 
   }, optionArgs);
 
@@ -55,6 +55,19 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
 
   return {
 
+    async tempFileExists(fileName) {
+      
+      try { 
+     
+        const tempFilePath = path.join(tempDir, fileName);
+        return await gracefulStat(tempFilePath);
+      } catch (err) {
+        
+        log.error(err);
+        return Promise.reject(err);
+      }
+    }, 
+    
     async saveTempBase64(fileName, base64URI) {
       
       try { 
@@ -75,7 +88,6 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
           stat,
           mimeType
         });
-
       } catch (err) {
     
         log.error(err);
