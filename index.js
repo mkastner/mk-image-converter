@@ -2,7 +2,8 @@ const fs = require('fs').promises;
 const log = require('mk-log');
 const path = require('path');
 const mkdirp = require('mkdirp');
-//const { spawn } = require('child_process');
+const rimraf = require('rimraf');
+const glob = require('glob');
 const gracefulStat = require('mk-graceful-stat');
 const convert = require('./lib/utils/convert');
 const deconstructBase64 = require('mk-deconstruct-base64');
@@ -21,6 +22,17 @@ function argsForConvert(filePath, resize) {
     '-write',
     filePath 
   ];
+}
+
+function globPromise(pattern, options) {
+  return new Promise( (resolve, reject) => {
+    glob(pattern, options, (err, files) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(files);
+    }); 
+  });
 }
 
 async function ensureDir(dir) {
@@ -94,6 +106,7 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
         return Promise.reject(err);
       }
     },
+
     async saveTempBinary(fileName, binaryData) {
 
       try {
@@ -112,6 +125,44 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
        
         log.error(err);
         return Promise.reject(err);
+      }
+    },
+
+    async remove(options) {
+
+      if (!options || (!options.subPath && !options.fileName)) {
+        throw new Error('options must be provided either with key for subPath or key for fileName'); 
+      }
+
+      const { subPath, fileName, fileTypes } = options; 
+
+      if (subPath) {
+        const assetsDir = path.join(assetsBaseDir, subPath); 
+
+        return new Promise((resolve, reject) => {
+          rimraf(assetsDir, (err) => {
+            if (err) { 
+              log.error(err);
+              return reject(err);
+            }
+            resolve();
+          });
+        });
+
+      }
+
+      const extName = path.extname(fileName); 
+      const baseFileName = fileName.replace(extName, '');  
+      const allFileTypes = fileTypes.concat('original');
+
+      for (let i = 0, l = allFileTypes.length; i < l; i++) {
+        const fileType = allFileTypes[i];
+        const globPattern = path.join(assetsBaseDir, fileType, `${baseFileName}.*`);  
+        const globbedFiles = await globPromise(globPattern);
+        for (let i = 0, l = globbedFiles.length; i < l; i++) {
+          const globbedFile = globbedFiles[i];
+          await fs.unlink(globbedFile); 
+        }
       }
     },
 

@@ -1,6 +1,6 @@
 {
   "name": "mk-image-converter",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "ImageMagic converter",
   "main": "index.js",
   "author": "John Galt",
@@ -12,6 +12,7 @@
     }
   },
   "dependencies": {
+    "glob": "^7.1.6",
     "image-size": "^0.8.3",
     "mime-types": "^2.1.26",
     "mk-deconstruct-base64": "https://github.com/mkastner/mk-deconstruct-base64.git#v0.0.1",

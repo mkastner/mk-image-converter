@@ -204,6 +204,95 @@ async function main() {
     }
   });
   
+  tape('delete all subPath versions', async (t) => {
+  
+    try {
+      
+      const exampleFile = await fs.readFile(
+        path.join(__dirname, 'assets','example.jpg') );
+     
+      const convertArgs = [
+        { type: 'medium', size: '100x>', ext: 'png' },
+        { type: 'thumbnail', size: '30x>', ext: 'jpg' }
+      ];
+    
+      const subPath = '74';
+
+      const assets = await ImageConverter(path.join(__dirname, 'results'));
+      await assets.saveTempBinary('example.jpg', exampleFile);  
+
+      await assets.convert('example.jpg', convertArgs, {subPath});
+
+      await assets.remove({subPath}); 
+
+      const statResultOriginalWithId = await gracefulStat(
+        path.join(__dirname, 'results', subPath, 'original', 'example.jpg'));
+
+      t.notOk(statResultOriginalWithId, 'Original version must be removed');
+
+      const statResultMediumWithId = await gracefulStat(
+        path.join(__dirname, 'results', subPath, 'medium', 'example.png'));
+
+      t.notOk(statResultMediumWithId, 'Medium version with must be removed');
+      
+      const statResultThumbnailWithId = await gracefulStat(
+        path.join(__dirname, 'results', subPath, 'thumbnail', 'example.jpg'));
+
+      t.notOk(statResultThumbnailWithId, 'Thumbnail version must be removed');
+
+    } catch (err) {
+      log.error(err); 
+
+    } finally {
+      t.end();
+    }
+  });
+  
+  tape('delete all non subpath versions', async (t) => {
+  
+    try {
+      
+      const exampleFile = await fs.readFile(
+        path.join(__dirname, 'assets','example.jpg') );
+     
+      const convertArgs = [
+        { type: 'medium', size: '100x>', ext: 'png' },
+        { type: 'thumbnail', size: '30x>', ext: 'jpg' }
+      ];
+
+      const assets = await ImageConverter(path.join(__dirname, 'results'));
+      await assets.saveTempBinary('example.jpg', exampleFile);  
+
+      await assets.convert('example.jpg', convertArgs);
+
+      const fileTypes = convertArgs.map( a => a.type );
+
+
+      await assets.remove({ fileName: 'example.jpg', fileTypes }); 
+
+      const statResultOriginalWithId = await gracefulStat(
+        path.join(__dirname, 'results', 'original', 'example.jpg'));
+
+      t.notOk(statResultOriginalWithId, 'Original version must be removed');
+
+      const statResultMediumWithId = await gracefulStat(
+        path.join(__dirname, 'results', 'medium', 'example.png'));
+
+      t.notOk(statResultMediumWithId, 'Medium version with must be removed');
+      
+      const statResultThumbnailWithId = await gracefulStat(
+        path.join(__dirname, 'results', 'thumbnail', 'example.jpg'));
+
+      t.notOk(statResultThumbnailWithId, 'Thumbnail version must be removed');
+
+    } catch (err) {
+      log.error(err); 
+
+    } finally {
+      t.end();
+    }
+  });
+  
   tape('check utility method tempfileExists', async (t) => {
     
     try { 
