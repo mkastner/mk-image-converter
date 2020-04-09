@@ -12,15 +12,16 @@ const mime = require('mime-types');
 
 function argsForConvert(filePath, resize) {
   return [
-    '-sampling-factor',
-    '4:2:0',
-    '-quality',
-    '80',
+    '\(', 
+    '+clone',
     '-resize',
     resize,
-    '-strip',
-    '-write',
-    filePath 
+    '-quality',
+    '80',
+    '-write', 
+    filePath, 
+    '+delete',
+    '\)' 
   ];
 }
 
@@ -188,7 +189,10 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
       const originalBaseFileName = originalSplitted[0];
       const originalExtension = originalSplitted[1];
 
-      const imageMagickArgs = [originalFilePath];
+      const imageMagickArgs = [
+        originalFilePath,
+        '-strip',
+      ];
       
       const convertedFiles = [];
       for (let i = 0, l = items.length; i < l; i++) {
@@ -207,10 +211,14 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
         });
         imageMagickArgs.push(argsForConvert(filePath, size)); 
       }
-     
+    
+
+
       const conversionStart = Date.now();
 
-      await convert(imageMagickArgs.flat());
+      const flattedArgs = imageMagickArgs.flat()
+      // log.info('flattedArgs', flattedArgs);
+      await convert(flattedArgs);
       const conversionEnd = Date.now();
     
       const conversionDuration = conversionEnd - conversionStart;

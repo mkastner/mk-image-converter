@@ -159,15 +159,13 @@ async function main() {
 
       await assets.convert('example.jpg', convertArgs);
 
-      const statResultMedium = await gracefulStat(
-        path.join(__dirname, 'results', 'medium', 'example.png'), true);
-
-      t.ok(statResultMedium, 'Medium version converted');
-     
-      const statResultThumbnail = await gracefulStat(
-        path.join(__dirname, 'results', 'thumbnail', 'example.jpg'), true);
-
-      t.ok(statResultThumbnail, 'Thumbnail version converted');
+      for (let i = 0, l = convertArgs.length; i < l; i++) {
+        const convertArg = convertArgs[i]; 
+        const statResultOriginalWithId = await gracefulStat(
+          path.join(__dirname, 'results', 
+            convertArg.type, `example.${convertArg.ext}`));
+        t.ok(statResultOriginalWithId, `${convertArg.type} version must be removed`);
+      }
     
       const subPath = '74';
 
@@ -184,17 +182,13 @@ async function main() {
 
       t.equal(convertedPlusOriginal, availableFiles.length, 'all types converted');
 
-      const statResultMediumWithId = await gracefulStat(
-        path.join(__dirname, 'results', 'medium', 'example.png'), true);
-
-      t.ok(statResultMediumWithId, 'Medium version with subPath converted');
-      
-      const statResultThumbnailWithId = await gracefulStat(
-        path.join(__dirname, 'results', subPath, 'thumbnail', 'example.jpg'), true);
-
-      t.ok(statResultThumbnailWithId, 'Thumbnail version with subPath converted');
-   
-       
+      for (let i = 0, l = convertArgs.length; i < l; i++) {
+        const convertArg = convertArgs[i]; 
+        const statResultOriginalWithId = await gracefulStat(
+          path.join(__dirname, 'results', 
+            subPath, convertArg.type, `example.${convertArg.ext}`));
+        t.ok(statResultOriginalWithId, `${convertArg.type} version created`);
+      }
 
     } catch (err) {
       log.error(err); 
@@ -224,25 +218,21 @@ async function main() {
       await assets.convert('example.jpg', convertArgs, {subPath});
 
       await assets.remove({subPath}); 
+      
+      for (let i = 0, l = convertArgs.length; i < l; i++) {
+        const convertArg = convertArgs[i]; 
+        const statResultOriginalWithId = await gracefulStat(
+          path.join(__dirname, 'results', subPath, convertArg.type, `example.${convertArg.ext}`));
+        t.notOk(statResultOriginalWithId, `${convertArg.type} version must be removed`);
+      }
 
       const statResultOriginalWithId = await gracefulStat(
         path.join(__dirname, 'results', subPath, 'original', 'example.jpg'));
 
       t.notOk(statResultOriginalWithId, 'Original version must be removed');
 
-      const statResultMediumWithId = await gracefulStat(
-        path.join(__dirname, 'results', subPath, 'medium', 'example.png'));
-
-      t.notOk(statResultMediumWithId, 'Medium version with must be removed');
-      
-      const statResultThumbnailWithId = await gracefulStat(
-        path.join(__dirname, 'results', subPath, 'thumbnail', 'example.jpg'));
-
-      t.notOk(statResultThumbnailWithId, 'Thumbnail version must be removed');
-
     } catch (err) {
       log.error(err); 
-
     } finally {
       t.end();
     }
@@ -267,23 +257,21 @@ async function main() {
 
       const fileTypes = convertArgs.map( a => a.type );
 
-
       await assets.remove({ fileName: 'example.jpg', fileTypes }); 
+
+      for (let i = 0, l = convertArgs.length; i < l; i++) {
+        const convertArg = convertArgs[i]; 
+        const statResultOriginalWithId = await gracefulStat(
+          path.join(__dirname, 'results', convertArg.type, 'example.jpg'));
+
+        t.notOk(statResultOriginalWithId, `${convertArg.type} version must be removed`);
+
+      }
 
       const statResultOriginalWithId = await gracefulStat(
         path.join(__dirname, 'results', 'original', 'example.jpg'));
-
       t.notOk(statResultOriginalWithId, 'Original version must be removed');
-
-      const statResultMediumWithId = await gracefulStat(
-        path.join(__dirname, 'results', 'medium', 'example.png'));
-
-      t.notOk(statResultMediumWithId, 'Medium version with must be removed');
       
-      const statResultThumbnailWithId = await gracefulStat(
-        path.join(__dirname, 'results', 'thumbnail', 'example.jpg'));
-
-      t.notOk(statResultThumbnailWithId, 'Thumbnail version must be removed');
 
     } catch (err) {
       log.error(err); 
@@ -311,6 +299,43 @@ async function main() {
       log.error(err); 
     } finally {
      
+      t.end();
+    }
+  });
+  
+  tape('convert for visual checking', async (t) => {
+  
+    try {
+      
+      const exampleFile = await fs.readFile(
+        path.join(__dirname, 'assets','example.png') );
+      
+      const assets = await ImageConverter(path.join(__dirname, 'visual-results'));
+      await assets.saveTempBinary('example.jpg', exampleFile);  
+     
+      const convertArgs = [
+        { type: 'huge-900', size: '900x>', ext: 'jpg' },
+        { type: 'huge-900', size: '900x>', ext: 'png' },
+        { type: 'big-600', size: '600x>', ext: 'jpg' },
+        { type: 'big-600', size: '600x>', ext: 'png' },
+        { type: 'medium-400', size: '400x>', ext: 'jpg' },
+        { type: 'medium-400', size: '400x>', ext: 'png' },
+        { type: 'small-200', size: '200x>', ext: 'jpg' },
+        { type: 'small-200', size: '200x>', ext: 'png' },
+        { type: 'rechner-120', size: '120x>', ext: 'jpg' },
+        { type: 'rechner-120', size: '120x>', ext: 'png' },
+        { type: 'thumbnail', size: '60x>', ext: 'jpg' },
+        { type: 'thumbnail', size: '60x>', ext: 'png' }
+      ];
+
+      await assets.convert('example.jpg', convertArgs);
+
+      t.ok(true, 'check quality');
+
+    } catch (err) {
+      log.error(err); 
+
+    } finally {
       t.end();
     }
   });
