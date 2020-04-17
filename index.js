@@ -192,6 +192,8 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
       const imageMagickArgs = [
         originalFilePath,
         '-strip',
+        '-alpha',
+        'remove'
       ];
       
       const convertedFiles = [];

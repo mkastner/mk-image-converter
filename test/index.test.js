@@ -308,10 +308,10 @@ async function main() {
     try {
       
       const exampleFile = await fs.readFile(
-        path.join(__dirname, 'assets','example.png') );
+        path.join(__dirname, 'assets','example-alpha.png') );
       
       const assets = await ImageConverter(path.join(__dirname, 'visual-results'));
-      await assets.saveTempBinary('example.jpg', exampleFile);  
+      await assets.saveTempBinary('example-alpha.jpg', exampleFile);  
      
       const convertArgs = [
         { type: 'huge-900', size: '900x>', ext: 'jpg' },
@@ -328,7 +328,7 @@ async function main() {
         { type: 'thumbnail', size: '60x>', ext: 'png' }
       ];
 
-      await assets.convert('example.jpg', convertArgs);
+      await assets.convert('example-alpha.jpg', convertArgs);
 
       t.ok(true, 'check quality');
 
