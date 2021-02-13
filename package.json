@@ -21,12 +21,12 @@
     "rimraf": "^3.0.2"
   },
   "peerDependencies": {
-    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.9"
+    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.11"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",
     "eslint": "^6.8.0",
-    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.10",
+    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.11",
     "nodemon": "^2.0.2",
     "tape": "^4.13.0"
   },
