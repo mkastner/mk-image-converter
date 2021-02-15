@@ -1,6 +1,6 @@
 {
   "name": "mk-image-converter",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "ImageMagic converter",
   "main": "index.js",
   "author": "John Galt",
