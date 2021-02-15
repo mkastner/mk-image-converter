@@ -219,7 +219,7 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
       const conversionStart = Date.now();
 
       const flattedArgs = imageMagickArgs.flat()
-      // log.info('flattedArgs', flattedArgs);
+      log.debug('flattedArgs', flattedArgs);
       await convert(flattedArgs);
       const conversionEnd = Date.now();
     
@@ -235,8 +235,17 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
         convertedFiles[i].h = dimensions.height;
       }
 
-      const originalDimensions = imageSize(originalFilePath); 
+      let originalDimensions = {
+        width: 0,
+        height: 0
+      };
 
+      try {
+        originalDimensions = imageSize(originalFilePath); 
+      } catch (e) {
+        log.warn('could not read dimensions for', originalFilePath);
+      }
+      
       const allFiles = convertedFiles.concat({
         w: originalDimensions.width,
         h: originalDimensions.height,

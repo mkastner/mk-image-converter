@@ -24,6 +24,7 @@ async function clearTestResults() {
 
 async function main() {
 
+
   try {
     await clearTestResults();
   }
@@ -54,11 +55,35 @@ async function main() {
       const mimeTypeJPG = deconstructJPG.mimeType;
       const extensionJPG = deconstructJPG.extension;
       const dataJPG = deconstructJPG.data;
-     
-
+      
       t.equal(mimeTypeJPG, 'image/jpeg', 'mime type');
       t.equal(extensionJPG, 'jpg', 'extension');
       t.ok(dataJPG, 'data');
+     
+      const base64SVGData = await fs.readFile(
+        path.join(__dirname, 'assets','example-svg.base64'), 'utf8' );
+    
+      const deconstructSVG  = deconstructBase64(base64SVGData);  
+      const mimeTypeSVG = deconstructSVG.mimeType;
+      const extensionSVG = deconstructSVG.extension;
+      const dataSVG = deconstructSVG.data;
+
+      t.equal(mimeTypeSVG, 'image/svg+xml', 'mime type for png');
+      t.equal(extensionSVG, 'svg', 'extension for svg');
+      t.ok(dataSVG, 'data for svg');
+
+      const base64PDFData = await fs.readFile(
+        path.join(__dirname, 'assets','example-pdf.base64'), 'utf8' );
+    
+      const deconstructPDF  = deconstructBase64(base64PDFData);  
+      const mimeTypePDF = deconstructPDF.mimeType;
+      const extensionPDF = deconstructPDF.extension;
+      const dataPDF = deconstructPDF.data;
+
+      t.equal(mimeTypePDF, 'application/pdf', 'mime type for png');
+      t.equal(extensionPDF, 'pdf', 'extension for pdf');
+      t.ok(dataPDF, 'data for pdf');
+    
     } catch (err) {
     
       log.error(err); 
@@ -97,6 +122,18 @@ async function main() {
         path.join(__dirname, 'results', 'tmp', 'base64-example.jpg'), true);
       
       t.ok(statResultJPG, 'original base64 as jpg saved');
+
+      const base64SVGData = await fs.readFile(
+        path.join(__dirname, 'assets','example-svg.base64'), 'utf8' );
+      const SVGResult = await assets.saveTempBase64('base64-example', base64SVGData);  
+
+      t.ok(SVGResult.stat, 'returning stat object');
+      t.equal(SVGResult.mimeType, 'image/svg+xml', 'returning stat object');
+
+      const statResultSVG = await gracefulStat(
+        path.join(__dirname, 'results', 'tmp', 'base64-example.svg'), true);
+      
+      t.ok(statResultSVG, 'original base64 as svg saved');
 
     } catch (err) {
       log.error(err); 
@@ -141,54 +178,64 @@ async function main() {
       t.end();
     }
   });
-  
+
   tape('convert from original to different sizes and file types', async (t) => {
   
     try {
-      
-      const exampleFile = await fs.readFile(
-        path.join(__dirname, 'assets','example.jpg') );
-      
-      const assets = await ImageConverter(path.join(__dirname, 'results'));
-      await assets.saveTempBinary('example.jpg', exampleFile);  
-     
       const convertArgs = [
         { type: 'medium', size: '100x>', ext: 'png' },
         { type: 'thumbnail', size: '30x>', ext: 'jpg' }
       ];
+     
+      async function testConvertType(fromFileName, convertArgs) {
+        const exampleFile = await fs.readFile(
+          path.join(__dirname, 'assets',fromFileName) );
+        
+        const assets = await ImageConverter(path.join(__dirname, 'results'));
+        await assets.saveTempBinary(fromFileName, exampleFile);  
+       
 
-      await assets.convert('example.jpg', convertArgs);
+        await assets.convert(fromFileName, convertArgs);
 
-      for (let i = 0, l = convertArgs.length; i < l; i++) {
-        const convertArg = convertArgs[i]; 
-        const statResultOriginalWithId = await gracefulStat(
-          path.join(__dirname, 'results', 
-            convertArg.type, `example.${convertArg.ext}`));
-        t.ok(statResultOriginalWithId, `${convertArg.type} version must be removed`);
+        for (let i = 0, l = convertArgs.length; i < l; i++) {
+          const convertArg = convertArgs[i]; 
+          const statResultOriginalWithId = await gracefulStat(
+            path.join(__dirname, 'results', 
+              convertArg.type, `example.${convertArg.ext}`));
+          t.ok(statResultOriginalWithId, `${convertArg.type} version must be removed`);
+        }
+      
+        const subPath = '74';
+
+        const assetsWithId = await ImageConverter(path.join(__dirname, 'results'));
+        await assetsWithId.saveTempBinary(fromFileName, exampleFile);  
+
+        const availableFiles
+          = await assetsWithId.convert(fromFileName, convertArgs, {subPath});
+
+        // available files must be convertedArgs.length
+        // i.e. the number of conversion types
+        // plus the original file
+
+        const convertedPlusOriginal = convertArgs.length + 1;
+
+        t.equal(convertedPlusOriginal, availableFiles.length, 'all types converted');
+
+        for (let i = 0, l = convertArgs.length; i < l; i++) {
+          const convertArg = convertArgs[i]; 
+          const statResultOriginalWithId = await gracefulStat(
+            path.join(__dirname, 'results', 
+              subPath, convertArg.type, `example.${convertArg.ext}`));
+          t.ok(statResultOriginalWithId, 
+            `${convertArg.type} version created from ${fromFileName}`);
+        }
+      
       }
-    
-      const subPath = '74';
 
-      const assetsWithId = await ImageConverter(path.join(__dirname, 'results'));
-      await assetsWithId.saveTempBinary('example.jpg', exampleFile);  
+      await testConvertType('example.jpg', convertArgs);
+      await testConvertType('example.svg', convertArgs);
+      await testConvertType('example.pdf', convertArgs);
 
-      const availableFiles = await assetsWithId.convert('example.jpg', convertArgs, {subPath});
-
-      // available files must be convertedArgs.length
-      // i.e. the number of conversion types
-      // plus the original file
-
-      const convertedPlusOriginal = convertArgs.length + 1;
-
-      t.equal(convertedPlusOriginal, availableFiles.length, 'all types converted');
-
-      for (let i = 0, l = convertArgs.length; i < l; i++) {
-        const convertArg = convertArgs[i]; 
-        const statResultOriginalWithId = await gracefulStat(
-          path.join(__dirname, 'results', 
-            subPath, convertArg.type, `example.${convertArg.ext}`));
-        t.ok(statResultOriginalWithId, `${convertArg.type} version created`);
-      }
 
     } catch (err) {
       log.error(err); 
@@ -290,7 +337,6 @@ async function main() {
       const assets = await ImageConverter(path.join(__dirname, 'results'));
       const resultBeforeTemp = await assets.tempFileExists('example.png'); 
       t.notOk(resultBeforeTemp, 'temp file not detected'); 
-      //const saveResult = 
       await assets.saveTempBase64('base64-example', base64PNGData); 
       const resultAfterTemp = await assets.tempFileExists('base64-example.png'); 
       t.ok(resultAfterTemp, 'temp file was detected'); 
