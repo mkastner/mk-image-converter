@@ -240,10 +240,14 @@ module.exports = async function MkImageConverter(assetsBaseDir, optionArgs) {
         height: 0
       };
 
-      try {
-        originalDimensions = imageSize(originalFilePath); 
-      } catch (e) {
-        log.warn('could not read dimensions for', originalFilePath);
+      if (!(originalFilePath || '').match(/\.pdf$/)) {
+        try {
+          originalDimensions = imageSize(originalFilePath); 
+        } catch (e) {
+          log.warn('could not read dimensions for', originalFilePath);
+        }
+      } else {
+        log.info('Skipping reading dimensions for pdf');
       }
       
       const allFiles = convertedFiles.concat({
