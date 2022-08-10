@@ -1,6 +1,6 @@
 {
   "name": "mk-image-converter",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "ImageMagic converter",
   "main": "index.js",
   "author": "John Galt",
@@ -12,23 +12,19 @@
     }
   },
   "dependencies": {
-    "glob": "^7.1.6",
-    "image-size": "^0.8.3",
-    "mime-types": "^2.1.26",
-    "mk-deconstruct-base64": "https://github.com/mkastner/mk-deconstruct-base64.git#v0.0.3",
-    "mk-graceful-stat": "https://github.com/mkastner/mk-graceful-stat.git#v0.0.2",
-    "mkdirp": "^1.0.3",
+    "glob": "^8.0.3",
+    "image-size": "^1.0.2",
+    "mime-types": "^2.1.35",
+    "mk-deconstruct-base64": "https://github.com/mkastner/mk-deconstruct-base64.git#v0.0.4",
+    "mk-graceful-stat": "https://github.com/mkastner/mk-graceful-stat.git#v0.0.4",
+    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.14",
+    "mkdirp": "^1.0.4",
     "rimraf": "^3.0.2"
   },
-  "peerDependencies": {
-    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.11"
-  },
   "devDependencies": {
-    "babel-eslint": "^10.0.3",
-    "eslint": "^6.8.0",
-    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.11",
-    "nodemon": "^2.0.2",
-    "tape": "^4.13.0"
+    "babel-eslint": "^10.1.0",
+    "eslint": "^8.21.0",
+    "tape": "^5.5.3"
   },
   "scripts": {
     "test": "NODE_ENV=test node test/index.test.js"
